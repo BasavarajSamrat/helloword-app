@@ -1,9 +1,14 @@
 pipeline {
     agent any
+
+    tools {
+        nodejs 'NodeJS 18'
+    }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/BasavarajSamrat/helloword-app.git'
+                git url: 'https://github.com/BasavarajSamrat/helloword-app.git', branch: 'main'
             }
         }
         stage('Install Dependencies') {
@@ -13,17 +18,20 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'npm start &'
+                sh 'npm run build'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'cp -r build/* /opt/tomcat/webapps/ROOT/'
             }
         }
     }
+
     post {
-        success {
-            echo 'Application deployed successfully!'
-        }
-        failure {
-            echo 'Build failed!'
+        always {
+            echo 'Pipeline completed.'
+            deleteDir()
         }
     }
 }
-
